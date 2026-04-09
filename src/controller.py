@@ -1,5 +1,19 @@
-from src.npu_core import mac_operation, compare_scores, LABEL_CROSS, LABEL_X
-from src.utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
+import json
+
+from src.npu_core import (
+    mac_operation,
+    compare_scores,
+    normalize_label,
+    LABEL_CROSS,
+    LABEL_X,
+)
+from src.utils import (
+    parse_matrix_input,
+    extract_size_from_key,
+    validate_matrix_size,
+    generate_dummy_matrix,
+    measure_mac_performance,
+)
 
 
 class SimulatorController:
@@ -26,6 +40,27 @@ class SimulatorController:
             except ValueError as e:
                 print(f"[입력 형식 오류] {e}\n다시 입력해주세요.\n")
 
+    def _print_performance_table(self, sizes):
+        """(내부 메서드) 주어진 크기 배열에 대한 성능 측정 결과를 표 형태로 출력합니다."""
+        print("\n=== 성능 분석 리포트 (Time Complexity: O(N^2)) ===")
+        print(f"{'크기(NxN)':<15} | {'연산 횟수(N^2)':<15} | {'평균 시간(ms)':<15}")
+        print("-" * 52)
+
+        for size in sizes:
+            # 평가를 위한 더미 데이터 생성
+            dummy_pattern = generate_dummy_matrix(size, 1.5)
+            dummy_filter = generate_dummy_matrix(size, 0.5)
+
+            # 10회 반복 측정 (utils 모듈의 함수 사용)
+            avg_time = measure_mac_performance(
+                mac_operation, dummy_pattern, dummy_filter, 10
+            )
+            operations = size * size
+
+            # 소수점 6자리까지 표기하여 미세한 시간 차이도 볼 수 있게 함
+            print(f"{f'{size}x{size}':<13} | {operations:<14} | {avg_time:.6f} ms")
+        print("-" * 52)
+
     def run_manual_mode(self):
         """모드 1(수동 입력) 시나리오 진행 메서드"""
         print("\n=== 모드 1: 사용자 입력 (3x3) 시작 ===")
@@ -45,6 +80,9 @@ class SimulatorController:
         print(f"{LABEL_CROSS} 필터 점수: {score_cross}")
         print(f"{LABEL_X} 필터 점수: {score_x}")
         print(f"최종 판정: {result}")
+
+        # [추가된 부분] 모드 1 요구사항: 3x3 크기에 대한 성능 분석 출력
+        self._print_performance_table([3])
         print("=== 모드 1 종료 ===")
 
     def run_json_mode(self, file_path="data.json"):
@@ -150,6 +188,9 @@ class SimulatorController:
                 print(
                     "\n[모든 케이스 SUCCESS!] 라벨 정규화와 Epsilon 정책이 성공적으로 동작했습니다."
                 )
+
+        # [추가된 부분] 모드 2 요구사항: 3x3 포함 5x5, 13x13, 25x25 성능 분석 출력
+        self._print_performance_table([3, 5, 13, 25])
         print("===============================\n")
 
 

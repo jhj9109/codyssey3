@@ -1,3 +1,6 @@
+import time
+
+
 def parse_matrix_input(input_lines, expected_size):
     """
     (순수 함수) 문자열 리스트를 검증하고 2차원 float 배열로 반환.
@@ -52,3 +55,30 @@ def validate_matrix_size(matrix, expected_size):
         if not isinstance(row, list) or len(row) != expected_size:
             return False
     return True
+
+
+def generate_dummy_matrix(size, value=1.0):
+    """
+    (순수 함수) 성능 측정을 위해 N x N 크기의 임의의 실수 배열을 생성합니다.
+    """
+    return [[value for _ in range(size)] for _ in range(size)]
+
+
+def measure_mac_performance(mac_func, pattern, filter_matrix, iterations=10):
+    """
+    (순수 함수) MAC 연산 함수의 순수 실행 시간을 N회 반복 측정하여 평균을 ms 단위로 반환합니다.
+    I/O(입출력) 시간은 포함되지 않습니다.
+    """
+    total_time = 0.0
+
+    for _ in range(iterations):
+        # 파이썬에서 성능 측정에 가장 적합한 고해상도 타이머 사용
+        start_time = time.perf_counter()
+        mac_func(pattern, filter_matrix)
+        end_time = time.perf_counter()
+
+        total_time += end_time - start_time
+
+    # 초(s) 단위를 밀리초(ms) 단위로 변환하여 반환
+    average_time_ms = (total_time / iterations) * 1000
+    return average_time_ms
