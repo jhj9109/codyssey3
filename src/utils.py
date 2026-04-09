@@ -27,9 +27,6 @@ def parse_matrix_input(input_lines, expected_size):
     return matrix
 
 
-# utils.py 기존 코드 아래에 추가
-
-
 def extract_size_from_key(pattern_key):
     """
     (순수 함수) 'size_5_01' 형태의 패턴 키 문자열에서 크기(N)를 정수로 추출합니다.

@@ -1,4 +1,4 @@
-from npu_core import (
+from src.npu_core import (
     mac_operation,
     normalize_label,
     compare_scores,
@@ -6,7 +6,7 @@ from npu_core import (
     LABEL_X,
     LABEL_UNDECIDED,
 )
-from utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
+from src.utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
 
 
 def run_phase1_tests():
