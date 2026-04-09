@@ -1,4 +1,4 @@
-from npu_core import (
+from src.npu_core import (
     mac_operation,
     normalize_label,
     compare_scores,
@@ -6,6 +6,7 @@ from npu_core import (
     LABEL_X,
     LABEL_UNDECIDED,
 )
+from src.utils import parse_matrix_input
 
 
 def run_phase1_tests():
@@ -46,5 +47,40 @@ def run_phase1_tests():
     print("=== Phase 1: 모든 코어 로직 정상 동작 확인 완료 ===")
 
 
+def run_phase2_tests():
+    print("\n=== Phase 2: 검증 로직 테스트 시작 ===")
+
+    # 1. 정상 입력 테스트
+    valid_input = ["1 0 1", "0 1 0", "1 0 1"]
+    parsed = parse_matrix_input(valid_input, 3)
+    assert parsed == [[1.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 1.0]]
+    print("[PASS] 1. 정상 입력 파싱 테스트 통과")
+
+    # 2. 예외 처리 테스트 - 행 부족
+    try:
+        parse_matrix_input(["1 0 1", "0 1 0"], 3)
+        assert False, "행 부족 예외가 발생해야 합니다."
+    except ValueError as e:
+        assert "행 개수 오류" in str(e)
+
+    # 3. 예외 처리 테스트 - 열 부족
+    try:
+        parse_matrix_input(["1 0 1", "0 1", "1 0 1"], 3)
+        assert False, "열 부족 예외가 발생해야 합니다."
+    except ValueError as e:
+        assert "열 개수 오류" in str(e)
+
+    # 4. 예외 처리 테스트 - 문자 포함
+    try:
+        parse_matrix_input(["1 0 1", "0 a 0", "1 0 1"], 3)
+        assert False, "숫자 파싱 예외가 발생해야 합니다."
+    except ValueError as e:
+        assert "숫자 파싱 오류" in str(e)
+
+    print("[PASS] 2. 예외 발생(행/열 불일치, 문자 입력) 방어 테스트 통과")
+    print("=== Phase 2: 검증 로직 정상 동작 확인 완료 ===\n")
+
+
 if __name__ == "__main__":
-    run_phase1_tests()
+    run_phase1_tests()  # 주석 해제하여 함께 실행 가능
+    run_phase2_tests()
