@@ -1,5 +1,6 @@
 from src.utils import parse_matrix_input
-from src.npu_core import mac_operation, compare_scores, LABEL_CROSS, LABEL_X
+from src.npu_core import mac_operation, compare_scores
+from src.constants import LABEL_CROSS, LABEL_X
 
 
 def get_matrix_from_user(matrix_name, size=3):

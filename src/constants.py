@@ -1,0 +1,5 @@
+# 표준 라벨 상수 정의
+LABEL_CROSS = "Cross"
+LABEL_X = "X"
+LABEL_UNDECIDED = "UNDECIDED"
+LABEL_UNKNOWN = "Unknown"

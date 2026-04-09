@@ -1,3 +1,6 @@
+from itertools import chain
+from src.constants import LABEL_CROSS, LABEL_X, LABEL_UNDECIDED, LABEL_UNKNOWN
+
 # 표준 라벨 상수 정의
 LABEL_CROSS = "Cross"
 LABEL_X = "X"
@@ -33,3 +36,40 @@ def compare_scores(score_cross, score_x, epsilon=1e-9):
         return LABEL_CROSS
     else:
         return LABEL_X
+
+
+def mac_operation_1d(pattern_1d, filter_1d):
+    """
+    (보너스) 1차원 배열로 최적화된 MAC 연산을 수행합니다.
+    데이터가 메모리에 연속적으로 존재하므로 캐시 히트율(Cache Hit Rate)이 높아질 수 있습니다.
+    """
+    n_squared = len(pattern_1d)
+    score = 0.0
+
+    # 중첩 루프(N x N)가 아닌 단일 루프(N^2) 사용
+
+    for i in range(n_squared):
+        score += pattern_1d[i] * filter_1d[i]
+
+    return score
+
+
+def mac_operation_chain(pattern, filter_matrix):
+
+    n_squared = len(pattern)
+    return sum(
+        p * f
+        for p, f in zip(
+            chain.from_iterable(pattern), chain.from_iterable(filter_matrix)
+        )
+    )
+
+
+def mac_operation_array(flat_array, weight_array):
+
+    n_squared = len(flat_array)
+    score = 0.0
+    for i in range(n_squared):
+        score += flat_array[i] * weight_array[i]
+
+    return score

@@ -1,11 +1,11 @@
 import json
 
+from src.constants import LABEL_CROSS, LABEL_X
 from src.npu_core import (
     mac_operation,
+    mac_operation_1d,
     compare_scores,
     normalize_label,
-    LABEL_CROSS,
-    LABEL_X,
 )
 from src.utils import (
     parse_matrix_input,
@@ -13,6 +13,8 @@ from src.utils import (
     validate_matrix_size,
     generate_dummy_matrix,
     measure_mac_performance,
+    generate_random_filter_pattern,
+    flatten_matrix,
 )
 
 
@@ -41,25 +43,37 @@ class SimulatorController:
                 print(f"[입력 형식 오류] {e}\n다시 입력해주세요.\n")
 
     def _print_performance_table(self, sizes):
-        """(내부 메서드) 주어진 크기 배열에 대한 성능 측정 결과를 표 형태로 출력합니다."""
-        print("\n=== 성능 분석 리포트 (Time Complexity: O(N^2)) ===")
-        print(f"{'크기(NxN)':<15} | {'연산 횟수(N^2)':<15} | {'평균 시간(ms)':<15}")
-        print("-" * 52)
+        """(내부 메서드) 최적화 전(2D)과 후(1D)의 성능 측정 결과를 비교 출력합니다."""
+        print("\n=== [보너스] 최적화 성능 분석 리포트 ===")
+        print(
+            f"{'크기(NxN)':<10} | {'연산 횟수':<10} | {'2D MAC (ms)':<15} | {'1D MAC (ms)':<15}"
+        )
+        print("-" * 70)
 
         for size in sizes:
-            # 평가를 위한 더미 데이터 생성
-            dummy_pattern = generate_dummy_matrix(size, 1.5)
-            dummy_filter = generate_dummy_matrix(size, 0.5)
+            # 보너스 과제 2: 더미 데이터 대신 '패턴 생성기' 활용
+            pattern_2d = generate_dummy_matrix(size)
+            filter_2d = generate_random_filter_pattern(size)
 
-            # 10회 반복 측정 (utils 모듈의 함수 사용)
-            avg_time = measure_mac_performance(
-                mac_operation, dummy_pattern, dummy_filter, 10
+            # 보너스 과제 1: 1차원 배열로 변환
+            pattern_1d = flatten_matrix(pattern_2d)
+            filter_1d = flatten_matrix(filter_2d)
+
+            # 100회 반복 측정 (차이를 더 명확히 보기 위해 반복 횟수 증가)
+            iterations = 100
+            avg_time_2d = measure_mac_performance(
+                mac_operation, pattern_2d, filter_2d, iterations
             )
+            avg_time_1d = measure_mac_performance(
+                mac_operation_1d, pattern_1d, filter_1d, iterations
+            )
+
             operations = size * size
 
-            # 소수점 6자리까지 표기하여 미세한 시간 차이도 볼 수 있게 함
-            print(f"{f'{size}x{size}':<13} | {operations:<14} | {avg_time:.6f} ms")
-        print("-" * 52)
+            print(
+                f"{f'{size}x{size}':<10}    |  {operations:<12} |   {avg_time_2d:.6f}      | {avg_time_1d:.6f}"
+            )
+        print("-" * 70)
 
     def run_manual_mode(self):
         """모드 1(수동 입력) 시나리오 진행 메서드"""

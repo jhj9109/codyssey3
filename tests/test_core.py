@@ -1,11 +1,5 @@
-from src.npu_core import (
-    mac_operation,
-    normalize_label,
-    compare_scores,
-    LABEL_CROSS,
-    LABEL_X,
-    LABEL_UNDECIDED,
-)
+from src.constants import LABEL_CROSS, LABEL_X, LABEL_UNDECIDED
+from src.npu_core import mac_operation, normalize_label, compare_scores
 from src.utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
 
 

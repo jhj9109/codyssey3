@@ -1,4 +1,8 @@
 import time
+import random
+import array
+
+from src.constants import LABEL_CROSS, LABEL_X
 
 
 def parse_matrix_input(input_lines, expected_size):
@@ -82,3 +86,47 @@ def measure_mac_performance(mac_func, pattern, filter_matrix, iterations=10):
     # 초(s) 단위를 밀리초(ms) 단위로 변환하여 반환
     average_time_ms = (total_time / iterations) * 1000
     return average_time_ms
+
+
+def generate_cross_pattern(size):
+    """(보너스) 크기 N의 십자가(Cross) 패턴을 자동 생성합니다."""
+    matrix = [[0.0 for _ in range(size)] for _ in range(size)]
+    mid = size // 2
+    for i in range(size):
+        matrix[mid][i] = 1.0  # 가로줄
+        matrix[i][mid] = 1.0  # 세로줄
+    return matrix
+
+
+def generate_x_pattern(size):
+    """(보너스) 크기 N의 X 패턴을 자동 생성합니다."""
+    matrix = [[0.0 for _ in range(size)] for _ in range(size)]
+    for i in range(size):
+        matrix[i][i] = 1.0  # \ 방향 대각선
+        matrix[i][size - 1 - i] = 1.0  # / 방향 대각선
+    return matrix
+
+
+def generate_filter_pattern(size, label):
+    pattern = None
+    if label == LABEL_CROSS:
+        pattern = generate_cross_pattern(size)
+    elif label == LABEL_X:
+        pattern = generate_x_pattern(size)
+    return pattern
+
+
+def generate_random_filter_pattern(size):
+    filter_options = [LABEL_CROSS, LABEL_X]
+    filter_selected = random.choice(filter_options)
+    return generate_filter_pattern(size, filter_selected)
+
+
+def flatten_matrix(matrix):
+    """(보너스) 2차원 배열을 1차원 배열(길이 N^2)로 변환합니다."""
+    return [val for row in matrix for val in row]
+
+
+def flatten_array(matrix):
+    """(보너스) 2차원 배열을 1차원 배열(길이 N^2)로 변환합니다."""
+    return array.array("d", [val for row in matrix for val in row])
