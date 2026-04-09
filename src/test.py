@@ -1,4 +1,4 @@
-from src.npu_core import (
+from npu_core import (
     mac_operation,
     normalize_label,
     compare_scores,
@@ -6,7 +6,7 @@ from src.npu_core import (
     LABEL_X,
     LABEL_UNDECIDED,
 )
-from src.utils import parse_matrix_input
+from utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
 
 
 def run_phase1_tests():
@@ -81,6 +81,34 @@ def run_phase2_tests():
     print("=== Phase 2: 검증 로직 정상 동작 확인 완료 ===\n")
 
 
+def run_phase3_tests():
+    print("\n=== Phase 3: JSON 검증 유틸리티 테스트 시작 ===")
+
+    # 1. 크기 추출 테스트
+    assert extract_size_from_key("size_5_01") == 5
+    assert extract_size_from_key("size_13_test") == 13
+
+    try:
+        extract_size_from_key("invalid_key")
+        assert False, "예외가 발생해야 합니다."
+    except ValueError:
+        pass
+    print("[PASS] 1. 패턴 키에서 크기(N) 추출 테스트 통과")
+
+    # 2. 행렬 크기 검증 테스트
+    valid_3x3 = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    invalid_3x2 = [[1, 2, 3], [4, 5, 6]]
+    invalid_3x3_with_hole = [[1, 2, 3], [4, 5], [7, 8, 9]]
+
+    assert validate_matrix_size(valid_3x3, 3) is True
+    assert validate_matrix_size(invalid_3x2, 3) is False
+    assert validate_matrix_size(invalid_3x3_with_hole, 3) is False
+    print("[PASS] 2. 2차원 리스트 N x N 크기/스키마 검증 테스트 통과")
+
+    print("=== Phase 3: 검증 유틸리티 정상 동작 확인 완료 ===\n")
+
+
 if __name__ == "__main__":
-    run_phase1_tests()  # 주석 해제하여 함께 실행 가능
+    run_phase1_tests()
     run_phase2_tests()
+    run_phase3_tests()

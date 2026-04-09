@@ -25,3 +25,33 @@ def parse_matrix_input(input_lines, expected_size):
         matrix.append(row)
 
     return matrix
+
+
+# utils.py 기존 코드 아래에 추가
+
+
+def extract_size_from_key(pattern_key):
+    """
+    (순수 함수) 'size_5_01' 형태의 패턴 키 문자열에서 크기(N)를 정수로 추출합니다.
+    """
+    try:
+        parts = pattern_key.split("_")
+        if len(parts) >= 2 and parts[0] == "size":
+            return int(parts[1])
+    except (ValueError, TypeError, AttributeError):
+        pass
+
+    raise ValueError(f"키 형식 오류: '{pattern_key}'에서 크기(N)를 추출할 수 없습니다.")
+
+
+def validate_matrix_size(matrix, expected_size):
+    """
+    (순수 함수) JSON에서 로드한 2차원 리스트가 정확히 N x N 크기인지 검증합니다.
+    (정상이면 True, 비정상이면 False 반환)
+    """
+    if not isinstance(matrix, list) or len(matrix) != expected_size:
+        return False
+    for row in matrix:
+        if not isinstance(row, list) or len(row) != expected_size:
+            return False
+    return True
