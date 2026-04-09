@@ -1,6 +1,6 @@
 import json
 
-from src.constants import LABEL_CROSS, LABEL_X
+from src.constants import LABEL_CROSS, LABEL_X, Color
 from src.npu_core import (
     mac_operation,
     mac_operation_1d,
@@ -32,7 +32,7 @@ class SimulatorController:
         while True:
             lines = []
             for i in range(size):
-                lines.append(input(f"Row {i+1}: "))
+                lines.append(input(f"Row {i}: "))
 
             try:
                 # 순수 함수인 parse_matrix_input을 호출하여 로직만 분리
@@ -40,15 +40,17 @@ class SimulatorController:
                 print(f"-> {matrix_name} 저장 완료!")
                 return matrix
             except ValueError as e:
-                print(f"[입력 형식 오류] {e}\n다시 입력해주세요.\n")
+                print(
+                    f"{Color.FAIL}[입력 형식 오류] {e}\n다시 입력해주세요.\n{Color.ENDC}"
+                )
 
     def _print_performance_table(self, sizes):
         """(내부 메서드) 최적화 전(2D)과 후(1D)의 성능 측정 결과를 비교 출력합니다."""
-        print("\n=== [보너스] 최적화 성능 분석 리포트 ===")
+        print(f"{Color.HEADER}\n=== [보너스] 최적화 성능 분석 리포트 ==={Color.ENDC}")
         print(
             f"{'크기(NxN)':<10} | {'연산 횟수':<10} | {'2D MAC (ms)':<15} | {'1D MAC (ms)':<15}"
         )
-        print("-" * 70)
+        print(f"{Color.HEADER}" + "-" * 70 + f"{Color.ENDC}")
 
         for size in sizes:
             # 보너스 과제 2: 더미 데이터 대신 '패턴 생성기' 활용
@@ -73,11 +75,11 @@ class SimulatorController:
             print(
                 f"{f'{size}x{size}':<10}    |  {operations:<12} |   {avg_time_2d:.6f}      | {avg_time_1d:.6f}"
             )
-        print("-" * 70)
+        print(f"{Color.HEADER}" + "-" * 70 + f"{Color.ENDC}")
 
     def run_manual_mode(self):
         """모드 1(수동 입력) 시나리오 진행 메서드"""
-        print("\n=== 모드 1: 사용자 입력 (3x3) 시작 ===")
+        print(f"{Color.HEADER}\n=== 모드 1: 사용자 입력 (3x3) 시작 ==={Color.ENDC}")
 
         # 1. 입력 단계 (I/O)
         filter_cross = self._read_matrix_from_console(f"필터 {LABEL_CROSS}", 3)
@@ -90,28 +92,34 @@ class SimulatorController:
         result = compare_scores(score_cross, score_x)
 
         # 3. 출력 단계 (I/O)
-        print("\n=== 연산 및 판정 결과 ===")
-        print(f"{LABEL_CROSS} 필터 점수: {score_cross}")
-        print(f"{LABEL_X} 필터 점수: {score_x}")
-        print(f"최종 판정: {result}")
+        print(f"{Color.HEADER}\n=== 연산 및 판정 결과 ==={Color.ENDC}")
+        print(f"{Color.OKCYAN}{LABEL_CROSS} 필터 점수: {score_cross}{Color.ENDC}")
+        print(f"{Color.OKCYAN}{LABEL_X} 필터 점수: {score_x}{Color.ENDC}")
+        print(f"{Color.OKGREEN}최종 판정: {result}{Color.ENDC}")
 
         # [추가된 부분] 모드 1 요구사항: 3x3 크기에 대한 성능 분석 출력
         self._print_performance_table([3])
-        print("=== 모드 1 종료 ===")
+        print(f"{Color.HEADER}=== 모드 1 종료 ==={Color.ENDC}")
 
     def run_json_mode(self, file_path="data.json"):
         """모드 2(JSON 파일 자동 평가) 시나리오 진행 메서드"""
-        print(f"\n=== 모드 2: JSON 파일 분석 ({file_path}) 시작 ===")
+        print(
+            f"{Color.HEADER}\n=== 모드 2: JSON 파일 분석 ({file_path}) 시작 ==={Color.ENDC}"
+        )
 
         # 1. 파일 로드 방어 로직
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
-            print(f"[오류] '{file_path}' 파일을 찾을 수 없습니다.")
+            print(
+                f"{Color.FAIL}[오류] '{file_path}' 파일을 찾을 수 없습니다.{Color.ENDC}"
+            )
             return
         except json.JSONDecodeError:
-            print(f"[오류] '{file_path}' 파일이 올바른 JSON 형식이 아닙니다.")
+            print(
+                f"{Color.FAIL}[오류] '{file_path}' 파일이 올바른 JSON 형식이 아닙니다.{Color.ENDC}"
+            )
             return
 
         filters_data = data.get("filters", {})
@@ -123,7 +131,7 @@ class SimulatorController:
 
         # 2. 패턴별 반복 평가
         for pattern_key, pattern_info in patterns_data.items():
-            print(f"\n[Case: {pattern_key}] 평가 중...")
+            print(f"{Color.HEADER}\n[Case: {pattern_key}] 평가 중...{Color.ENDC}")
 
             # 개별 케이스 단위로 예외를 잡아 프로그램 중단을 방지
             try:
@@ -173,10 +181,10 @@ class SimulatorController:
 
                 # PASS/FAIL 결정
                 if result_label == expected_label:
-                    print("  -> [PASS]")
+                    print(f"  -> {Color.OKGREEN}[PASS]{Color.ENDC}")
                     pass_count += 1
                 else:
-                    print("  -> [FAIL]")
+                    print(f"  -> {Color.FAIL}[FAIL]{Color.ENDC}")
                     fail_count += 1
                     fail_details.append(
                         f"[{pattern_key}] 판정 실패: (예상: {expected_label} != 실제 판정: {result_label})"
@@ -184,28 +192,28 @@ class SimulatorController:
 
             except Exception as e:
                 # 데이터가 깨져있거나 에러가 나더라도 FAIL 처리 후 다음으로 넘어감
-                print(f"  -> [FAIL] 오류 발생: {e}")
+                print(f"  -> {Color.FAIL}[FAIL]{Color.ENDC} 오류 발생: {e}")
                 fail_count += 1
                 fail_details.append(f"[{pattern_key}] 데이터/검증 오류: {e}")
 
         # 3. 최종 요약 출력
         total_cases = pass_count + fail_count
-        print("\n=== 모드 2 최종 결과 리포트 ===")
+        print(f"{Color.HEADER}\n=== 모드 2 최종 결과 리포트 ==={Color.ENDC}")
         print(f"Total: {total_cases} | Pass: {pass_count} | Fail: {fail_count}")
 
         if fail_count > 0:
-            print("\n[FAIL 케이스 원인 분석]")
+            print(f"{Color.FAIL}\n[FAIL 케이스 원인 분석]{Color.ENDC}")
             for detail in fail_details:
                 print(f" - {detail}")
         else:
             if total_cases > 0:
                 print(
-                    "\n[모든 케이스 SUCCESS!] 라벨 정규화와 Epsilon 정책이 성공적으로 동작했습니다."
+                    f"{Color.OKGREEN}\n[모든 케이스 SUCCESS!] 라벨 정규화와 Epsilon 정책이 성공적으로 동작했습니다.{Color.ENDC}"
                 )
 
         # [추가된 부분] 모드 2 요구사항: 3x3 포함 5x5, 13x13, 25x25 성능 분석 출력
         self._print_performance_table([3, 5, 13, 25])
-        print("===============================\n")
+        print(f"===============================\n")
 
 
 # 테스트 및 개별 실행용 진입점

@@ -1,12 +1,6 @@
 from itertools import chain
 from src.constants import LABEL_CROSS, LABEL_X, LABEL_UNDECIDED, LABEL_UNKNOWN
 
-# 표준 라벨 상수 정의
-LABEL_CROSS = "Cross"
-LABEL_X = "X"
-LABEL_UNDECIDED = "UNDECIDED"
-LABEL_UNKNOWN = "Unknown"
-
 
 def mac_operation(pattern, filter_matrix):
     """(순수 함수) 입력 패턴과 필터의 MAC 연산 결과를 float로 반환"""
@@ -56,7 +50,6 @@ def mac_operation_1d(pattern_1d, filter_1d):
 
 def mac_operation_chain(pattern, filter_matrix):
 
-    n_squared = len(pattern)
     return sum(
         p * f
         for p, f in zip(
