@@ -44,6 +44,36 @@ class SimulatorController:
                     f"{Color.FAIL}[입력 형식 오류] {e}\n다시 입력해주세요.\n{Color.ENDC}"
                 )
 
+    def _load_json_file(self, file_path):
+        """(내부 메서드) JSON 파일을 로드하여 데이터 구조로 반환합니다. 예외 처리를 포함합니다."""
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            print(f"-> '{file_path}' 파일 로드 성공!")
+
+            filters_data = data["filters"]
+            patterns_data = data["patterns"]
+
+            return filters_data, patterns_data
+        except FileNotFoundError:
+            print(
+                f"{Color.FAIL}[오류] '{file_path}' 파일을 찾을 수 없습니다.{Color.ENDC}"
+            )
+        except json.JSONDecodeError:
+            print(
+                f"{Color.FAIL}[오류] '{file_path}' 파일이 올바른 JSON 형식이 아닙니다.{Color.ENDC}"
+            )
+        except KeyError as e:
+            print(
+                f"{Color.FAIL}[오류] JSON 데이터에서 필요한 키가 누락되었습니다: {e}{Color.ENDC}"
+            )
+        except Exception as e:
+            print(
+                f"{Color.FAIL}[오류] JSON 파일 로드 중 예기치 않은 오류가 발생했습니다: {e}{Color.ENDC}"
+            )
+        return None
+
     def _print_performance_table(self, sizes):
         """(내부 메서드) 최적화 전(2D)과 후(1D)의 성능 측정 결과를 비교 출력합니다."""
         print(f"{Color.HEADER}\n=== [보너스] 최적화 성능 분석 리포트 ==={Color.ENDC}")
@@ -61,8 +91,8 @@ class SimulatorController:
             pattern_1d = flatten_matrix(pattern_2d)
             filter_1d = flatten_matrix(filter_2d)
 
-            # 100회 반복 측정 (차이를 더 명확히 보기 위해 반복 횟수 증가)
-            iterations = 100
+            # 10회 반복 측정
+            iterations = 10
             avg_time_2d = measure_mac_performance(
                 mac_operation, pattern_2d, filter_2d, iterations
             )
@@ -107,23 +137,12 @@ class SimulatorController:
             f"{Color.HEADER}\n=== 모드 2: JSON 파일 분석 ({file_path}) 시작 ==={Color.ENDC}"
         )
 
-        # 1. 파일 로드 방어 로직
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            print(
-                f"{Color.FAIL}[오류] '{file_path}' 파일을 찾을 수 없습니다.{Color.ENDC}"
-            )
-            return
-        except json.JSONDecodeError:
-            print(
-                f"{Color.FAIL}[오류] '{file_path}' 파일이 올바른 JSON 형식이 아닙니다.{Color.ENDC}"
-            )
+        data = self._load_json_file(file_path)
+        if data is None:
+            print(f"{Color.FAIL}모드 2 실행을 중단합니다.{Color.ENDC}")
             return
 
-        filters_data = data.get("filters", {})
-        patterns_data = data.get("patterns", {})
+        filters_data, patterns_data = data
 
         pass_count = 0
         fail_count = 0
@@ -169,7 +188,7 @@ class SimulatorController:
                 # 라벨 정규화
                 expected_label = normalize_label(expected_raw)
 
-                # MAC 연산 및 판정
+                # MAC 연산 및 판정 (잘못된 인자 존재시 연산과정에서 에러 발생 가능)
                 score_cross = mac_operation(pattern_input, filter_cross)
                 score_x = mac_operation(pattern_input, filter_x)
                 result_label = compare_scores(score_cross, score_x)
