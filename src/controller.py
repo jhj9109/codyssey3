@@ -212,8 +212,7 @@ class SimulatorController:
                 )
 
         # [추가된 부분] 모드 2 요구사항: 3x3 포함 5x5, 13x13, 25x25 성능 분석 출력
-        self._print_performance_table([5, 13, 25])
-        print(f"===============================\n")
+        self._print_performance_table([3, 5, 13, 25])
 
 
 # 테스트 및 개별 실행용 진입점
