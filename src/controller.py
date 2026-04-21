@@ -1,6 +1,6 @@
 import json
 
-from src.constants import LABEL_CROSS, LABEL_X, Color
+from src.constants import LABEL_A, LABEL_B, LABEL_CROSS, LABEL_X, Color
 from src.npu_core import (
     mac_operation,
     mac_operation_1d,
@@ -29,20 +29,26 @@ class SimulatorController:
     def _read_matrix_from_console(self, matrix_name, size):
         """콘솔 입출력을 담당하는 내부 메서드 (사이드 이펙트 격리)"""
         print(f"\n[{matrix_name}] {size}x{size} 크기로 입력해주세요. (공백 구분)")
-        while True:
-            lines = []
-            for i in range(size):
-                lines.append(input(f"Row {i}: "))
-
-            try:
-                # 순수 함수인 parse_matrix_input을 호출하여 로직만 분리
-                matrix = parse_matrix_input(lines, size)
-                print(f"-> {matrix_name} 저장 완료!")
-                return matrix
-            except ValueError as e:
+        matrix = []
+        while len(matrix) < size:
+            raw_input = input(f"Row {len(matrix) + 1}: ")
+            tokens = raw_input.strip().split()
+            # 1차 검증: 개수 확인
+            if len(tokens) != size:
                 print(
-                    f"{Color.FAIL}[입력 형식 오류] {e}\n다시 입력해주세요.\n{Color.ENDC}"
+                    f"  [오류] {size}개의 숫자를 입력해야 합니다. (현재 {len(tokens)}개). 이 행을 다시 입력하세요."
                 )
+                continue
+
+            # 2차 검증: 실수형(float) 변환 가능 여부 확인
+            try:
+                matrix.append([float(x) for x in tokens])
+            except ValueError:
+                print(
+                    "  [오류] 변환할 수 없는 문자가 포함되어 있습니다. 숫자만 다시 입력하세요."
+                )
+                continue
+        return matrix
 
     def _load_json_file(self, file_path):
         """(내부 메서드) JSON 파일을 로드하여 데이터 구조로 반환합니다. 예외 처리를 포함합니다."""
@@ -111,20 +117,23 @@ class SimulatorController:
         """모드 1(수동 입력) 시나리오 진행 메서드"""
         print(f"{Color.HEADER}\n=== 모드 1: 사용자 입력 (3x3) 시작 ==={Color.ENDC}")
 
+        FILTER_NAME_1 = LABEL_A
+        FILTER_NAME_2 = LABEL_B
+
         # 1. 입력 단계 (I/O)
-        filter_cross = self._read_matrix_from_console(f"필터 {LABEL_CROSS}", 3)
-        filter_x = self._read_matrix_from_console(f"필터 {LABEL_X}", 3)
+        filter_1 = self._read_matrix_from_console(f"필터 {FILTER_NAME_1}", 3)
+        filter_2 = self._read_matrix_from_console(f"필터 {FILTER_NAME_2}", 3)
         pattern = self._read_matrix_from_console("입력 패턴", 3)
 
         # 2. 연산 및 판정 단계 (순수 함수 조합)
-        score_cross = mac_operation(pattern, filter_cross)
-        score_x = mac_operation(pattern, filter_x)
-        result = compare_scores(score_cross, score_x)
+        score_1 = mac_operation(pattern, filter_1)
+        score_2 = mac_operation(pattern, filter_2)
+        result = compare_scores(score_1, score_2)
 
         # 3. 출력 단계 (I/O)
         print(f"{Color.HEADER}\n=== 연산 및 판정 결과 ==={Color.ENDC}")
-        print(f"{Color.OKCYAN}{LABEL_CROSS} 필터 점수: {score_cross}{Color.ENDC}")
-        print(f"{Color.OKCYAN}{LABEL_X} 필터 점수: {score_x}{Color.ENDC}")
+        print(f"{Color.OKCYAN}{FILTER_NAME_1} 필터 점수: {score_1}{Color.ENDC}")
+        print(f"{Color.OKCYAN}{FILTER_NAME_2} 필터 점수: {score_2}{Color.ENDC}")
         print(f"{Color.OKGREEN}최종 판정: {result}{Color.ENDC}")
 
         # [추가된 부분] 모드 1 요구사항: 3x3 크기에 대한 성능 분석 출력
