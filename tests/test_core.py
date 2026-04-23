@@ -1,5 +1,5 @@
 from src.constants import LABEL_CROSS, LABEL_X, LABEL_UNDECIDED
-from src.npu_core import mac_operation, normalize_label, compare_scores
+from src.npu_core import mac_operation, normalize_label, compare_two_scores
 from src.utils import parse_matrix_input, extract_size_from_key, validate_matrix_size
 
 
@@ -31,11 +31,11 @@ def run_phase1_tests():
     print("[PASS] 2. MAC 연산 테스트 통과")
 
     # 3. 점수 비교 및 판정 테스트
-    result = compare_scores(score_with_cross, score_with_x)
+    result = compare_two_scores(score_with_cross, score_with_x, LABEL_CROSS, LABEL_X)
     assert result == LABEL_CROSS
 
-    assert compare_scores(5.0, 5.0) == LABEL_UNDECIDED
-    assert compare_scores(5.0, 5.0000000001) == LABEL_UNDECIDED
+    assert compare_two_scores(5.0, 5.0, LABEL_CROSS, LABEL_X) == LABEL_UNDECIDED
+    assert compare_two_scores(5.0, 5.0000000001, LABEL_CROSS, LABEL_X) == LABEL_UNDECIDED
     print("[PASS] 3. 부동소수점(epsilon) 기반 판정 테스트 통과\n")
 
     print("=== Phase 1: 모든 코어 로직 정상 동작 확인 완료 ===")

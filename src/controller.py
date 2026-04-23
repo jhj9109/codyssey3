@@ -4,7 +4,7 @@ from src.constants import LABEL_A, LABEL_B, LABEL_CROSS, LABEL_X, Color
 from src.npu_core import (
     mac_operation,
     mac_operation_1d,
-    compare_scores,
+    compare_two_scores,
     normalize_label,
 )
 from src.utils import (
@@ -128,7 +128,7 @@ class SimulatorController:
         # 2. 연산 및 판정 단계 (순수 함수 조합)
         score_1 = mac_operation(pattern, filter_1)
         score_2 = mac_operation(pattern, filter_2)
-        result = compare_scores(score_1, score_2)
+        result = compare_two_scores(score_1, score_2, FILTER_NAME_1, FILTER_NAME_2)
 
         # 3. 출력 단계 (I/O)
         print(f"{Color.HEADER}\n=== 연산 및 판정 결과 ==={Color.ENDC}")
@@ -200,7 +200,7 @@ class SimulatorController:
                 # MAC 연산 및 판정 (잘못된 인자 존재시 연산과정에서 에러 발생 가능)
                 score_cross = mac_operation(pattern_input, filter_cross)
                 score_x = mac_operation(pattern_input, filter_x)
-                result_label = compare_scores(score_cross, score_x)
+                result_label = compare_two_scores(score_cross, score_x, LABEL_CROSS, LABEL_X)
 
                 print(
                     f"  - {LABEL_CROSS} 점수: {score_cross}, {LABEL_X} 점수: {score_x}"

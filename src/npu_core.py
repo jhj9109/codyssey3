@@ -1,5 +1,5 @@
 from itertools import chain
-from src.constants import LABEL_CROSS, LABEL_X, LABEL_UNDECIDED, LABEL_UNKNOWN
+from src.constants import EPSILON, LABEL_A, LABEL_B, LABEL_CROSS, LABEL_X, LABEL_UNDECIDED, LABEL_UNKNOWN
 
 
 def mac_operation(pattern, filter_matrix):
@@ -22,14 +22,45 @@ def normalize_label(label):
     return LABEL_UNKNOWN
 
 
-def compare_scores(score_cross, score_x, epsilon=1e-9):
+def is_close(score_a, score_b, epsilon=EPSILON):
+    """(순수 함수) 부동소수점으로 인한 오차이내 같은것으로 판정"""
+    return abs(score_a - score_b) < epsilon
+
+
+def compare_two_scores(score_a, score_b, label_a, label_b, tie_label=LABEL_UNDECIDED, epsilon=EPSILON):
     """(순수 함수) 오차를 고려해 판정 결과를 문자열로 반환"""
-    if abs(score_cross - score_x) < epsilon:
-        return LABEL_UNDECIDED
-    elif score_cross > score_x:
-        return LABEL_CROSS
+    if is_close(score_a, score_b, epsilon):
+        return tie_label
+    elif score_a > score_b:
+        return label_a
     else:
-        return LABEL_X
+        return label_b
+    
+
+def get_best_match(scores_dict: dict, tie_label=LABEL_UNDECIDED, epsilon=EPSILON):
+    """
+    (순수 함수) 딕셔너리로 전달된 여러 점수 중 최고점을 찾고 해당 라벨을 반환합니다.
+    최고점과 epsilon 이내의 점수가 2개 이상이면 tie_label을 반환합니다.
+    
+    Args:
+        scores_dict (dict): {'라벨명': 점수} 형태의 딕셔너리
+        tie_label (str): 동점일 경우 반환할 라벨
+        epsilon (float): 부동소수점 오차 허용 범위
+    """
+    if not scores_dict:
+        return tie_label
+
+    max_score = max(scores_dict.values())
+    
+    top_labels = [
+        label for label, score in scores_dict.items() 
+        if is_close(max_score, score, epsilon)
+    ]
+
+    if len(top_labels) > 1:
+        return tie_label
+    else:
+        return top_labels[0]
 
 
 def mac_operation_1d(pattern_1d, filter_1d):

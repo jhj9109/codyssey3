@@ -6,6 +6,8 @@ LABEL_B = "B"
 LABEL_UNDECIDED = "UNDECIDED"
 LABEL_UNKNOWN = "Unknown"
 
+EPSILON = 1e-9
+
 
 class Color:
     HEADER = "\033[95m"

@@ -197,7 +197,7 @@ Total: 5 | Pass: 4 | Fail: 1
 
 - constants.py에 LABEL_O = 'O' 상수를 추가합니다.
 - normalize_label 함수에 elif label_str in ['o', 'circle']: 분기를 추가합니다.
-- compare_scores 함수를 3개 이상의 변수를 처리할 수 있도록 max() 기반 로직으로 리팩토링합니다.
+- compare_two_scores 함수를 3개 이상의 변수를 처리할 수 있도록 max() 기반 로직으로 리팩토링합니다.
 - 마지막으로 테스트 파일과 JSON 스키마를 업데이트하여 회귀 테스트를 수행합니다.
 
 ### 2. 초대규모(1000×1000) 패턴 처리 시 발생하는 문제와 최적화 전략:
